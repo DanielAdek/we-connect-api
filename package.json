@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "babel-node server/app",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon --exec babel-node server/app",
+    "test": "nyc mocha test/**.spec.js --require babel-core/register --exit",
     "migrate": "sequelize db:migrate",
     "unmigrate": "sequelize db:migrate:undo:all"
   },
@@ -47,6 +48,7 @@
     "eslint": "^5.4.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.6",
     "nyc": "^13.1.0"
