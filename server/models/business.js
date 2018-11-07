@@ -1,4 +1,4 @@
- export default (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Business = sequelize.define('Business', {
     businessName: {
       type: DataTypes.STRING,

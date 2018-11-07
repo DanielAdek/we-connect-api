@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import jsend from 'jsend';
+import routes from './routes';
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,8 @@ app.use(jsend.middleware);
 
 app.use(json);
 app.use(urlencoded);
+
+app.use('/api/v1', routes);
 
 app.get('/', (req, res) => res.status(200).jsend.success({
   message: 'Hello World'
