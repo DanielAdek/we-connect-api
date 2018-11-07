@@ -4,9 +4,12 @@
   "description": "Get business around you",
   "main": "app.js",
   "scripts": {
+    "pretest": "NODE_ENV=test sequelize db:migrate",
+    "posttest": "NODE_ENV=test sequelize db:migrate:undo:all",
     "start": "babel-node server/app",
     "start:dev": "nodemon --exec babel-node server/app",
-    "test": "nyc mocha test/**.spec.js --require babel-core/register --exit",
+    "test": "NODE_ENV=test nyc mocha test/**.spec.js --require babel-core/register --exit",
+    "test:dev": "npm run posttest && npm test",
     "migrate": "sequelize db:migrate",
     "unmigrate": "sequelize db:migrate:undo:all"
   },
