@@ -70,4 +70,25 @@ export default class BusinessController {
       }).then(() => res.status(200).jsend.success({ message: 'Business Successfully updated' }));
     }).catch(err => res.status(500).jsend.fail(`Internal server error ${err.message}`));
   }
+
+  /**
+   * delete a business
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  static deleteBusiness(req, res) {
+    const { businessId } = req.params;
+    Business.findOne({
+      where: {
+        id: parseInt(businessId, 10)
+      }
+    }).then((business) => {
+      if (!business) {
+        return res.status(404).jsend.fail({ message: 'No business Found!' });
+      }
+      return business.destroy().then(() => res.status(200).jsend.success({ message: 'Business Successfully Deleted' }));
+    });
+  }
 }

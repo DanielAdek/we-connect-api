@@ -77,4 +77,29 @@ describe('TEST ALL ENDPOINT', () => {
         });
     });
   });
+
+  describe('DELETE', () => {
+    it('should return status 200 and delete business', (done) => {
+      chai
+        .request(app)
+        .delete(`${baseUrl}/business/2`)
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.body.should.have.property('data');
+          res.body.data.message.should.equal('Business Successfully Deleted');
+          done();
+        });
+    });
+    it('should return status 400 and not business not found', (done) => {
+      chai
+        .request(app)
+        .delete(`${baseUrl}/business/419`)
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.body.should.have.property('data');
+          res.body.data.message.should.equal('No business Found!');
+          done();
+        });
+    });
+  });
 });
