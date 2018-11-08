@@ -88,7 +88,26 @@ export default class BusinessController {
       if (!business) {
         return res.status(404).jsend.fail({ message: 'No business Found!' });
       }
-      return business.destroy().then(() => res.status(200).jsend.success({ message: 'Business Successfully Deleted' }));
+      return business.destroy().then(() => res.status(200).jsend.success({ message: 'Business Successfully Deleted', business }));
     });
+  }
+
+  /**
+   * find businesses
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  static findByCategoryOrFindAll(req, res) {
+    const { categories } = req.query;
+    if (!categories) {
+      return Business.findAll().then(businesses => res.status(200).jsend.success({ businesses }));
+    }
+    return Business
+      .findAll({
+        where: { categories }
+      })
+      .then(businesses => res.status(200).jsend.success({ businesses }));
   }
 }
