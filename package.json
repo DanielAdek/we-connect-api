@@ -4,6 +4,7 @@
   "description": "Get business around you",
   "main": "app.js",
   "scripts": {
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "posttest": "NODE_ENV=test sequelize db:migrate:undo:all",
     "start": "babel-node server/app",
@@ -11,7 +12,8 @@
     "test": "NODE_ENV=test nyc mocha test/**.spec.js --require babel-core/register --exit",
     "test:dev": "npm run posttest && npm test",
     "migrate": "sequelize db:migrate",
-    "unmigrate": "sequelize db:migrate:undo:all"
+    "unmigrate": "sequelize db:migrate:undo:all",
+    "heroku-postbuild": "npm run migrate"
   },
   "repository": {
     "type": "git",

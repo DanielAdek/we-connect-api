@@ -102,4 +102,29 @@ describe('TEST ALL ENDPOINT', () => {
         });
     });
   });
+
+  describe('GET', () => {
+    it('should return status 200 and all businesses', (done) => {
+      chai
+        .request(app)
+        .get(`${baseUrl}/businesses`)
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.body.should.have.property('data');
+          res.body.data.businesses.should.be.an('array');
+          done();
+        });
+    });
+    it('should return status 200 and all businesses by the category', (done) => {
+      chai
+        .request(app)
+        .get(`${baseUrl}/businesses?categories=software development`)
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.body.should.have.property('data');
+          res.body.data.businesses.should.be.an('array');
+          done();
+        });
+    });
+  });
 });

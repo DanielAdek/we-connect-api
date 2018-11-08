@@ -3,7 +3,7 @@ module.exports = {
     businessName: 'testname',
     description: 'description',
     address: '',
-    categories: '',
+    categories: 'software development',
     contactNumber: '0303004',
     createdAt: '2018-11-07',
     updatedAt: '2018-11-07'
