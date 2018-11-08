@@ -16,7 +16,7 @@ describe('TEST ALL ENDPOINT', () => {
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
-          res.body.data.message.should.equal('Hello World');
+          res.body.data.message.should.equal('Welcome! to the your biz-connect App');
           done();
         });
     });

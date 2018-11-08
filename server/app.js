@@ -24,9 +24,9 @@ app.use(urlencoded);
 app.use('/api/v1', routes);
 
 app.get('/', (req, res) => res.status(200).jsend.success({
-  message: 'Hello World'
+  message: 'Welcome! to the your biz-connect App'
 }));
 
-app.listen(port, () => console.log(`server is running on port ${port}`));
+app.listen(port);
 
 export default app;
