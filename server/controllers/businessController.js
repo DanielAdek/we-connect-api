@@ -45,5 +45,29 @@ export default class BusinessController {
       });
   }
 
-  
+  /**
+   * modify a business
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  static modifyBusiness(req, res) {
+    const {
+      businessName, categories, contactNumber, address, description
+    } = req.body;
+    const { businessId } = req.params;
+    Business.findOne({
+      where: {
+        id: parseInt(businessId, 10)
+      }
+    }).then((business) => {
+      if (!business) {
+        return res.status(404).jsend.fail({ message: 'No business Found!' });
+      }
+      return business.update({
+        businessName, categories, contactNumber, address, description
+      }).then(() => res.status(200).jsend.success({ message: 'Business Successfully updated' }));
+    }).catch(err => res.status(500).jsend.fail(`Internal server error ${err.message}`));
+  }
 }
