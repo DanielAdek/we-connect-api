@@ -22,7 +22,9 @@ You can find the template at [https://www.pivotaltracker.com/n/projects/2223778]
 
 
 ### API Deployment
-API is deployed at [https://biz-connect.herokuapp.com/](https://biz-connect.herokuapp.com/)
+API is deployed at [https://biz-connect.herokuapp.com](https://biz-connect.herokuapp.com/)
+
+***You can test endpoints with the following routes listed on the [table](#api-endpoints) provided below:***
 
 ## Technologies
 
@@ -76,9 +78,7 @@ API is deployed at [https://biz-connect.herokuapp.com/](https://biz-connect.hero
 #### Testing with Postman
 
 * After installing as shown above
-* Navigate to [localhost:8000/api/v1/business/create](http://localhost:3000/api/v1/business/create) in
-  [Postman](https://getpostman.com/) to create business
-
+* Navigate to [localhost:8000/api/v1](http://localhost:3000/api/v1) on [Postman](https://getpostman.com/).
 #### Testing with Coverage Data
 
 * After installing as shown 
@@ -94,19 +94,41 @@ You can run `npm run start:dev` in development to use [Nodemon](https://nodemon.
 
 
 ##### Open the postman and test the following existing routes
+***Note:*** You have to sign up or log in to perfom operations.
+
 <table>
     <tr>
         <th>API</th>
         <th>HTTP verb</th>
         <th>Action</th>
     </tr>
+     <tr>
+        <td>/api/v1/auth/signup</td>
+        <td>POST</td>
+        <td>Create an account</td>
+    </tr>
+     <tr>
+        <td>/api/v1/auth/login</td>
+        <td>POST</td>
+        <td>Login to your account</td>
+    </tr>
+     <tr>
+        <td>/api/v1/auth/users</td>
+        <td>POST</td>
+        <td>Retrieve all users</td>
+    </tr>
+     <tr>
+        <td>/api/v1/auth/del/user/{userId}</td>
+        <td>POST</td>
+        <td>Close account</td>
+    </tr>
     <tr>
-        <td>/api/v1/business/create</td>
+        <td>/api/v1/business/register</td>
         <td>POST</td>
         <td>Create new business</td>
     </tr>
     <tr>
-        <td>/api/v1/business{businessId}</td>
+        <td>/api/v1/business/{businessId}</td>
         <td>PUT</td>
         <td>Update a business</td>
     </tr>
