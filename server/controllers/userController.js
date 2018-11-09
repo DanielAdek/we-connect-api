@@ -87,12 +87,16 @@ export default class User {
    * @memberof User
    */
   static deleteAccount(req, res) {
+    const { userId } = req.params;
     const { id } = req.decoded;
-    Users.findOne({
+    return Users.findOne({
       where: {
-        id
+        id: parseInt(userId, 10)
       }
     }).then((user) => {
+      if (!user) {
+        return res.status(400).jsend.fail({ message: 'Account does not exist' });
+      }
       if (user.id !== id) {
         return res.status(400).jsend.fail({ message: 'This Account does not belong to you' });
       }

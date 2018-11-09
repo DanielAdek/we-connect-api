@@ -15,7 +15,7 @@ const {
   findAllUsers, deleteAccount
 } = userController;
 
-const { verifyUser, validateInputFields } = auth;
+const { verifyUser, validateInputFields, checkIfUserExist } = auth;
 
 router.post('/auth/login', loginUser);
 router.post(
@@ -24,32 +24,33 @@ router.post(
 );
 
 router.get(
-  '/auth/users', findAllUsers
+  '/auth/users', verifyUser,
+  checkIfUserExist, findAllUsers
 );
 
 router.delete(
-  '/auth/del/user', verifyUser,
-  deleteAccount
+  '/auth/del/user/:userId', verifyUser,
+  checkIfUserExist, deleteAccount
 );
 
 router.post(
   '/business/register', verifyUser,
-  createBusiness
+  checkIfUserExist, createBusiness
 );
 
 router.put(
   '/business/:businessId', verifyUser,
-  modifyBusiness
+  checkIfUserExist, modifyBusiness
 );
 
 router.delete(
   '/business/:businessId', verifyUser,
-  deleteBusiness
+  checkIfUserExist, deleteBusiness
 );
 
 router.get(
   '/businesses', verifyUser,
-  findByCategoryOrFindAll
+  checkIfUserExist, findByCategoryOrFindAll
 );
 
 export default router;

@@ -72,7 +72,6 @@ describe('TEST ALL ENDPOINT', () => {
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
-          res.body.data.message.should.equal('Business Successfully updated');
         });
       done();
     });
@@ -100,7 +99,6 @@ describe('TEST ALL ENDPOINT', () => {
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
-          res.body.data.message.should.equal('Business Successfully Deleted');
         });
       done();
     });
