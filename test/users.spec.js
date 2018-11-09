@@ -62,7 +62,6 @@ describe('TEST ALL ENDPOINT', () => {
 
   describe('POST', () => {
     it('should return status 200 and login user', (done) => {
-      const username = 'testname';
       const user = {
         email: 'mail1@gmail.com',
         password: 'newpassword',
@@ -100,7 +99,7 @@ describe('TEST ALL ENDPOINT', () => {
     it('should return status 200 and delete user', (done) => {
       chai
         .request(app)
-        .delete(`${baseUrl}/auth/del/user`)
+        .delete(`${baseUrl}/auth/del/user/2`)
         .set('Authorization', `${token.userTwo}`)
         .end((err, res) => {
           res.body.should.be.an('object');
@@ -112,7 +111,7 @@ describe('TEST ALL ENDPOINT', () => {
   });
 
   describe('GET', () => {
-    it('should return status 200 and all businesses', (done) => {
+    it('should return status 200 and all users', (done) => {
       chai
         .request(app)
         .get(`${baseUrl}/auth/users`)
@@ -121,6 +120,20 @@ describe('TEST ALL ENDPOINT', () => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.users.should.be.an('array');
+        });
+      done();
+    });
+  });
+
+  describe('Midleware', () => {
+    it('should return user does not exist', (done) => {
+      chai
+        .request(app)
+        .get(`${baseUrl}/auth/users`)
+        .set('Authorization', `${token.user}`)
+        .end((err, res) => {
+          res.body.should.be.an('object');
+          res.body.should.have.property('data');
         });
       done();
     });

@@ -2,7 +2,6 @@ import { Op } from 'sequelize';
 import db from '../models';
 
 const { Businesses } = db;
-
 /**
  * @class BusinessController
  */
@@ -18,17 +17,16 @@ export default class BusinessController {
     const {
       businessName, categories, contactNumber, address, description
     } = req.body;
-    const { id: userId } = req.decoded;
     return Businesses
       .findOrCreate({
         where: {
           [Op.or]: [
-            { businessName },
-            { contactNumber }
+            { businessName: req.body.businessName },
+            { contactNumber: req.body.contactNumber }
           ]
         },
         defaults: {
-          userId, businessName, categories, description, address, contactNumber
+          businessName, categories, description, address, contactNumber
         }
       })
       .spread((business, created) => {
@@ -59,26 +57,20 @@ export default class BusinessController {
     } = req.body;
     const { businessId } = req.params;
     const { id: userId } = req.decoded;
-    Businesses.findOne({
+    return Businesses.findOne({
       where: {
-        id: parseInt(businessId, 10),
-        userId
+        id: parseInt(businessId, 10)
       }
     }).then((business) => {
       if (!business) {
         return res.status(404).jsend.fail({ message: 'No business Found!' });
       }
       if (business.userId !== userId) {
-        return res.status(400).jsend.fail({ message: 'This business does not belong to you' });
+        return res.status(400).jsend.fail({ message: 'You can only update your own business' });
       }
       return business.update({
         businessName, categories, contactNumber, address, description
-      }).then((modifiedBusines) => {
-        res.status(200).jsend.success({
-          message: 'Business Successfully updated',
-          modifiedBusines
-        });
-      });
+      }).then(() => res.status(200).jsend.success({ message: 'Business Successfully updated' }));
     }).catch(err => res.status(500).jsend.fail(`Internal server error ${err.message}`));
   }
 
@@ -94,15 +86,14 @@ export default class BusinessController {
     const { id: userId } = req.decoded;
     Businesses.findOne({
       where: {
-        id: parseInt(businessId, 10),
-        userId
+        id: parseInt(businessId, 10)
       }
     }).then((business) => {
       if (!business) {
         return res.status(404).jsend.fail({ message: 'No business Found!' });
       }
       if (business.userId !== userId) {
-        return res.status(400).jsend.fail({ message: 'This business does not belong to you' });
+        return res.status(400).jsend.fail({ message: 'You can only delete your own business' });
       }
       return business.destroy().then(() => res.status(200).jsend.success({ message: 'Business Successfully Deleted', business }));
     });
