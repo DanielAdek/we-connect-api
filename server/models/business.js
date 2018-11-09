@@ -1,5 +1,5 @@
-export default (sequelize, DataTypes) => {
-  const Business = sequelize.define('Business', {
+const businessModel = (sequelize, DataTypes) => {
+  const Business = sequelize.define('Businesses', {
     businessName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -35,6 +35,12 @@ export default (sequelize, DataTypes) => {
   });
   Business.associate = (models) => {
     // associations can be defined here
+    Business.belongsTo(models.Users, {
+      foreignKey: 'userId',
+      onDelete: 'CASCADE'
+    });
   };
   return Business;
 };
+
+export default businessModel;

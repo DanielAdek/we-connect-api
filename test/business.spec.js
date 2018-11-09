@@ -1,30 +1,40 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../server/app';
+import clientToken from './token.config';
 
 chai.use(chaiHttp);
 const { should } = chai;
 should();
 
-const baseUrl = '/api/v1';
-describe('TEST ALL ENDPOINT', () => {
-  describe('Initial testing', () => {
-    it('should return Hello world', (done) => {
-      chai
-        .request(app)
-        .get('/')
-        .end((err, res) => {
-          res.body.should.be.an('object');
-          res.body.should.have.property('data');
-          res.body.data.message.should.equal('Welcome! to the your biz-connect App');
-          done();
-        });
-    });
-  });
+const { baseUrl, token } = clientToken;
 
+describe('TEST ALL ENDPOINT', () => {
+  before('Create new business to seed database', (done) => {
+    chai.request(app)
+      .post(`${baseUrl}/business/register`)
+      .set('Authorization', `${token.user}`)
+      .send({
+        businessName: 'anothertestbuiz',
+        description: 'new description',
+        address: '',
+        categories: 'software development',
+        contactNumber: '0909090334',
+        createdAt: '2018-11-07',
+        updatedAt: '2018-11-07'
+      })
+      .end((error) => {
+        if (error) {
+          console.log('An error occured while creating seeduser data');
+        } else {
+          console.log('User created successfully');
+        }
+        done();
+      });
+  });
   describe('POST', () => {
     const newBusiness = {
-      businessName: 'devSquare',
+      businessName: 'new biz',
       description: 'Hire a new developer hire',
       address: '321 avenue business location',
       contactNumber: '08182089681',
@@ -33,14 +43,15 @@ describe('TEST ALL ENDPOINT', () => {
     it('should return status 201 and create business', (done) => {
       chai
         .request(app)
-        .post(`${baseUrl}/business/create`)
+        .post(`${baseUrl}/business/register`)
+        .set('Authorization', `${token.user}`)
         .send(newBusiness)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.message.should.equal('New Business is successfully created');
-          done();
         });
+      done();
     });
   });
 
@@ -55,26 +66,28 @@ describe('TEST ALL ENDPOINT', () => {
     it('should return status 200 and update business', (done) => {
       chai
         .request(app)
-        .put(`${baseUrl}/business/1`)
+        .put(`${baseUrl}/business/3`)
+        .set('Authorization', `${token.user}`)
         .send(business)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.message.should.equal('Business Successfully updated');
-          done();
         });
+      done();
     });
     it('should return status 400 and not update business', (done) => {
       chai
         .request(app)
         .put(`${baseUrl}/business/419`)
+        .set('Authorization', `${token.user}`)
         .send(business)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.message.should.equal('No business Found!');
-          done();
         });
+      done();
     });
   });
 
@@ -82,24 +95,26 @@ describe('TEST ALL ENDPOINT', () => {
     it('should return status 200 and delete business', (done) => {
       chai
         .request(app)
-        .delete(`${baseUrl}/business/2`)
+        .delete(`${baseUrl}/business/4`)
+        .set('Authorization', `${token.user}`)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.message.should.equal('Business Successfully Deleted');
-          done();
         });
+      done();
     });
     it('should return status 400 and not business not found', (done) => {
       chai
         .request(app)
         .delete(`${baseUrl}/business/419`)
+        .set('Authorization', `${token.user}`)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.message.should.equal('No business Found!');
-          done();
         });
+      done();
     });
   });
 
@@ -108,23 +123,25 @@ describe('TEST ALL ENDPOINT', () => {
       chai
         .request(app)
         .get(`${baseUrl}/businesses`)
+        .set('Authorization', `${token.user}`)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.businesses.should.be.an('array');
-          done();
         });
+      done();
     });
     it('should return status 200 and all businesses by the category', (done) => {
       chai
         .request(app)
         .get(`${baseUrl}/businesses?categories=software development`)
+        .set('Authorization', `${token.user}`)
         .end((err, res) => {
           res.body.should.be.an('object');
           res.body.should.have.property('data');
           res.body.data.businesses.should.be.an('array');
-          done();
         });
+      done();
     });
   });
 });
