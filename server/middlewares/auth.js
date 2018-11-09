@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
+import db from '../models';
+
+const { Users } = db;
 
 require('dotenv').config();
 
@@ -54,5 +57,26 @@ export default class Authenticate {
       return res.status(400).json({ check });
     }
     return next();
+  }
+
+  /**
+     * checkIfUserExist()
+     * @desc user shoult exist to perform operation
+     * @param {object} req The request object
+     * @param {object} res The request object
+     * @param {function} next
+     * @returns {json} json
+     */
+  static checkIfUserExist(req, res, next) {
+    const { id } = req.decoded;
+    return Users.findOne({ where: { id } })
+      .then((user) => {
+        if (!user) {
+          return res.status(400).jsend.fail({
+            message: 'You can not perfom operation, your account does not exist'
+          });
+        }
+        return next();
+      });
   }
 }
