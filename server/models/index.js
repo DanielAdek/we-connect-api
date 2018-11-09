@@ -6,7 +6,7 @@ import configPath from '../config/config';
 
 dotenv.config();
 
-const basename = path.basename(module.filename);
+const basename = path.basename(__filename);
 const config = configPath[process.env.NODE_ENV];
 const db = {};
 
