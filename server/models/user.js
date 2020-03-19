@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+
 export default (sequelize, DataTypes) => {
   const User = sequelize.define('Users', {
     username: {
@@ -13,6 +15,14 @@ export default (sequelize, DataTypes) => {
           msg: 'username can only contain letters'
         }
       }
+    },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
@@ -34,5 +44,11 @@ export default (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     });
   };
+
+  User.beforeValidate((user) => {
+    user.password = bcrypt.hashSync(user.password, 8);
+  });
+
+  User.comparePassword = (password, self) => bcrypt.compareSync(password, self.password);
   return User;
 };

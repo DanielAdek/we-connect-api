@@ -1,123 +1,96 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { Form } from 'form-my-simple-validation';
+import * as Utils from '../utils/helpers';
+import formSchema from '../utils/validation';
+import { errorResponse, successResponse } from '../utils/response';
+import * as Services from '../services';
 import db from '../models';
-
-require('dotenv').config();
-
-const secret = process.env.SECRET;
 
 const { Users } = db;
 
 /**
- * @class User
+ * @class
  */
-export default class User {
+export class UserController {
   /**
-     * createUser()
-     * @desc create a new user account
-     * @param {*} req express request object
-     * @param {*} res exoress response object
-     * @returns {object} json
-     */
-  static createUser(req, res) {
-    const password = bcrypt.hashSync(req.body.password, 10);
-    const { username, email } = req.body;
-    return Users
-      .findOrCreate({
-        where: {
-          email
-        },
-        defaults: {
-          username, email, password
-        }
-      })
-      .spread((user, created) => {
-        if (!created) {
-          return res.status(400).jsend.fail({ message: 'Account already existed!' });
-        }
-        const { id } = user;
-        const token = jwt.sign({ email, id }, secret, { expiresIn: '24h' });
-        res.status(201).jsend.success({
-          message: `${user.username} is successfully created as a new account`,
-          user: { id, username, email },
-          Client_Token: token
-        });
-      })
-      .catch((err) => {
-        res.status(500).jsend.fail({ message: `Something went wrong: ${err.message}` });
-      });
-  }
+   * @method create
+   * @param {object} req The request object
+   * @param {object} res The response object
+   * @return {*} json
+   */
+  async createUser(req, res) {
+    try {
+      const {
+        username, email, password, firstName, lastName
+      } = req.body;
 
-  /**
-     * @returns {object} loginUser
-     * @param {*} req
-     * @param {*} res
-     */
-  static loginUser(req, res) {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      res.status(400).jsend.fail({ message: 'email and password cannot be empty' });
+      // validate form fields
+      const validationResult = Form.validateFields('onboard', formSchema, req.body);
+
+      if (validationResult.error) {
+        return res.status(400).jsend.fail(validationResult);
+      }
+
+      // deny duplicate record
+      const report = await Services.reportDuplicate(this.database = Users, { email });
+
+      if (report === 'negative') {
+        return res.status(409).jsend.fail(errorResponse('DuplicateError', 409, 'email', 'Create User Account', 'Email already exist', { error: true, operationStatus: 'Processs Terminated!' }));
+      }
+
+      // Create customer account
+      const data = {
+        username, email, firstName, lastName, password
+      };
+
+      const user = await Services.insertToDataBase(this.database = Users, data);
+
+      const token = Utils.generateToken('8760h', { id: user.id });
+
+      return res.status(201).jsend.success(successResponse('Account created!', 201, 'Create User Account', {
+        error: false, operationStatus: 'Operation Successful!', user, token
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'create User', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
     }
-    return Users
-      .findOne({
-        where: {
-          email
-        }
-      }).then((user) => {
-        if (user && bcrypt.compareSync(password, user.password)) {
-          const { id, username } = user;
-          const token = jwt.sign({ email, id }, secret, { expiresIn: '24h' });
-          return res.status(200).jsend.success({
-            message: `Welcome back ${username}`,
-            user: { id, username, email },
-            Client_token: token
-          });
-        }
-        return res.status(400).jsend.fail({ message: 'email or password is incorrect' });
-      }).catch((err) => {
-        res.status(500).jsend.fail({ message: `something went wrong: ${err.message} ` });
-      });
   }
 
   /**
-   * delete a user account
-   * @param {object} req - The request object
-   * @param {object} res - The response object
-   * @return {object} json
-   * @memberof User
+   * @method login
+   * @param {object} req The request object
+   * @param {object} res The response object
+   * @return {*} json
    */
-  static deleteAccount(req, res) {
-    const { userId } = req.params;
-    const { id } = req.decoded;
-    return Users.findOne({
-      where: {
-        id: parseInt(userId, 10)
+  async login(req, res) {
+    try {
+      const { email, password } = req.body;
+      // validate form fields
+      const validationResult = Form.validateFields('authenticate', formSchema, req.body);
+
+      if (validationResult.error) {
+        return res.status(400).jsend.fail(validationResult);
       }
-    }).then((user) => {
+
+      const user = await Services.retreiveOneData(this.database = Users, { email });
+
       if (!user) {
-        return res.status(400).jsend.fail({ message: 'Account does not exist' });
+        return res.status(409).jsend.fail(errorResponse('IdentificatonError', 409, 'email', 'login', 'Email not found', { error: true, operationStatus: 'Processs Terminated!' }));
       }
-      if (user.id !== id) {
-        return res.status(400).jsend.fail({ message: 'This Account does not belong to you' });
-      }
-      return user.destroy().then(() => res.status(200).jsend.success({ message: 'Account Is Successfully Deleted' }));
-    });
-  }
 
-  /**
-   * find alls user
-   * @param {object} req - The request object
-   * @param {object} res - The response object
-   * @return {object} json
-   * @memberof User
-   */
-  static findAllUsers(req, res) {
-    return Users
-      .findAll({
-        attributes: ['id', 'username', 'email', 'createdAt', 'updatedAt']
-      })
-      .then((users) => {
-        res.status(200).jsend.success({ users });
-      });
+      // confirm password is correct
+      const passwordMatch = Users.comparePassword(password, user);
+      if (!passwordMatch) {
+        return res.status(409).jsend.fail(errorResponse('IdentificatonError', 400, 'password', 'login', 'password incorrect', { error: true, operationStatus: 'Processs Terminated!', passwordMatch }));
+      }
+
+      const token = Utils.generateToken('8760h', { id: user.id });
+
+      return res.status(200).jsend.success(successResponse('Login Successful', 200, 'login', {
+        error: false, operationStatus: 'Operation Successful!', user, token
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'login User', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
   }
 }
