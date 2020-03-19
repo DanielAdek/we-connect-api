@@ -1,56 +1,41 @@
-import express from 'express';
-import businessController from '../controllers/businessController';
-import userController from '../controllers/userController';
-import auth from '../middlewares/auth';
+import { Router } from 'express';
+import { UserRoutes } from './user';
+import { BusinessRoutes } from './business';
 
-const router = express.Router();
+/**
+ * @class UserRoutes
+ */
+export class ApplicationRoutes {
+  /**
+   * @constructor UserRoutes
+   */
+  constructor() {
+    this.router = Router();
+    this.routes();
+  }
 
-const {
-  createBusiness, modifyBusiness,
-  deleteBusiness, findByCategoryOrFindAll
-} = businessController;
+  /**
+   * @memberof UserRoutes
+   * @returns {void} nothing to return
+   */
+  routes() {
+    this.UserRoute();
+    this.BusinessRoute();
+  }
 
-const {
-  createUser, loginUser,
-  findAllUsers, deleteAccount
-} = userController;
+  /**
+   * @memberof ApplicationRoutes
+   * @returns {*} router object
+   */
+  UserRoute() {
+    return this.router.use('/user', new UserRoutes().router);
+  }
 
-const { verifyUser, validateInputFields, checkIfUserExist } = auth;
-
-router.post('/auth/login', loginUser);
-router.post(
-  '/auth/signup',
-  validateInputFields, createUser
-);
-
-router.get(
-  '/auth/users', verifyUser,
-  checkIfUserExist, findAllUsers
-);
-
-router.delete(
-  '/auth/del/user/:userId', verifyUser,
-  checkIfUserExist, deleteAccount
-);
-
-router.post(
-  '/business/register', verifyUser,
-  checkIfUserExist, createBusiness
-);
-
-router.put(
-  '/business/:businessId', verifyUser,
-  checkIfUserExist, modifyBusiness
-);
-
-router.delete(
-  '/business/:businessId', verifyUser,
-  checkIfUserExist, deleteBusiness
-);
-
-router.get(
-  '/businesses', verifyUser,
-  checkIfUserExist, findByCategoryOrFindAll
-);
-
-export default router;
+  /**
+   * @memberof ApplicationRoutes
+   * @returns {*} router object
+   */
+  BusinessRoute() {
+    return this.router.use('/business', new BusinessRoutes().router);
+  }
+}

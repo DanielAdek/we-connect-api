@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
 import dotenv from 'dotenv';
-import configPath from '../config/config';
+import configPath from '../config/config.json';
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ const sequelize = new Sequelize(process.env[config.use_env_variable], { logging:
 
 fs
   .readdirSync(__dirname)
-  .filter(file => (file.indexOf('.') !== 0)
+  .filter((file) => (file.indexOf('.') !== 0)
     && (file !== basename)
     && (file.slice(-3) === '.js'))
   .forEach((file) => {
@@ -28,7 +28,13 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-sequelize.authenticate().then(() => console.log('database connected')).catch(err => console.log('unable to connect ', err.message))
+sequelize.authenticate().then(() => {
+  console.log(' Database connected');
+  console.log(process.env.LINE);
+}).catch((err) => {
+  console.log(' Unable to connect ', err.message);
+  console.log(process.env.LINE);
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

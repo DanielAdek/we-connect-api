@@ -21,27 +21,17 @@ module.exports = {
     description: {
       type: Sequelize.STRING
     },
-    address: {
+    category: {
       type: Sequelize.STRING
     },
-    categories: {
+    businessLocation: {
       type: Sequelize.STRING
     },
     contactNumber: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Telephone Number is required'
-        },
-        isInt: {
-          msg: 'Enter a valid Telephone Number'
-        },
-        len: {
-          args: [7, 11],
-          msg: 'Telephone Number should be 7 to 11 characters'
-        },
-      }
+      type: Sequelize.STRING
+    },
+    businessImage: {
+      type: Sequelize.STRING
     },
     createdAt: {
       allowNull: false,
@@ -52,5 +42,5 @@ module.exports = {
       type: Sequelize.DATE
     }
   }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Businesses')
+  down: (queryInterface) => queryInterface.dropTable('Businesses')
 };

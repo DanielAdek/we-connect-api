@@ -1,82 +1,39 @@
-import jwt from 'jsonwebtoken';
-import validator from 'validator';
+import { config } from 'dotenv';
+import * as JWT from 'jsonwebtoken';
+import { errorResponse } from '../utils/response';
+import * as Services from '../services';
 import db from '../models';
 
 const { Users } = db;
 
-require('dotenv').config();
+config();
 
 const secret = process.env.SECRET;
-/**
- * @class Authenticate
- */
-export default class Authenticate {
-  /**
-     * verifyUser()
-     * @desc verify a user
-     * @param {object} req The request object
-     * @param {object} res The request object
-     * @param {function} next
-     * @returns {json} json
-     */
-  static verifyUser(req, res, next) {
-    const token = req.headers['x-access-token'] || req.headers.authorization;
-    if (!token) {
-      res.status(403).json({ message: 'You need an API token to access this endpoint' });
-    }
-    try {
-      const decoded = jwt.verify(token, secret);
-      if (!decoded) {
-        res.status(403).json({ message: 'Invalid API token provided' });
+
+export const verifyToken = (req, res, next) => {
+  try {
+    const tokenBearer = req.headers.authorization;
+
+    if (!tokenBearer) return res.status(403).jsend.fail(errorResponse('Forbiden', 403, 'headers:{Authorization}', 'Authorize user', 'Client key is required. Access Denied!', { error: true, operationStatus: 'Processs Terminated!' }));
+
+    const token = tokenBearer.split(' ')[1];
+
+    JWT.verify(token, secret, async (err, decoded) => {
+      if (err) {
+        const result = errorResponse('Rejection', 403, 'headers:{Authorization}', 'Authorize user', 'Client key is invalid. Access Denied!', { error: true, operationStatus: 'Processs Terminated!' });
+        return res.status(403).jsend.fail(result);
       }
-      req.decoded = decoded;
+      const user = await Services.retreiveOneData(Users, { id: decoded.id });
+
+      if (!user) {
+        const result = errorResponse('Rejection', 403, 'headers:{Authorization}', 'Authorize user', 'User not found', { error: true, operationStatus: 'Processs Terminated!' });
+        return res.status(403).jsend.fail(result);
+      }
+      req.user = user;
       next();
-    } catch (err) {
-      res.status(400).jsend.fail({ message: 'Invalid API token provided' });
-    }
+    });
+  } catch (error) {
+    const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'Authorization', `${error.message}`, { error: true, operationStatus: 'Processs Terminated!', errorSpec: error });
+    return res.status(500).jsend.fail(result);
   }
-
-  /**
-     * validateInputFields()
-     * @desc user does not input any data
-     * @param {object} req The request object
-     * @param {object} res The request object
-     * @param {function} next
-     * @returns {json} json
-     */
-  static validateInputFields(req, res, next) {
-    const check = [];
-    const { username, email, password } = req.body;
-    if (username.trim() === '' || password.trim() === '') {
-      check.push('username or password cannot be empty');
-    }
-    if (!validator.isEmail(email)) {
-      check.push('Email must be valid i.e you@mail.com');
-    }
-    if (check.length > +'') {
-      return res.status(400).json({ check });
-    }
-    return next();
-  }
-
-  /**
-     * checkIfUserExist()
-     * @desc user shoult exist to perform operation
-     * @param {object} req The request object
-     * @param {object} res The request object
-     * @param {function} next
-     * @returns {json} json
-     */
-  static checkIfUserExist(req, res, next) {
-    const { id } = req.decoded;
-    return Users.findOne({ where: { id } })
-      .then((user) => {
-        if (!user) {
-          return res.status(400).jsend.fail({
-            message: 'You can not perfom operation, your account does not exist'
-          });
-        }
-        return next();
-      });
-  }
-}
+};
