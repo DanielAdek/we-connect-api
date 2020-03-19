@@ -153,10 +153,10 @@ export class BusinessController {
 
       const { id: userId } = req.user;
 
-      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId });
+      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId, trashed: false });
 
       if (!business) {
-        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'trash business', 'business does not exist or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
+        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'trash business', 'business does not exist, or already in trash or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
       }
 
       const data = { trashed: true };
@@ -217,13 +217,13 @@ export class BusinessController {
 
       const { id: userId } = req.user;
 
-      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId });
+      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId, trashed: true });
 
       if (!business) {
-        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'delete trashed business', 'business does not exist or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
+        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'delete trashed business', 'business does not exist in trash or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
       }
 
-      await Services.expungeData(this.database = Businesses, { id, trashed: true });
+      await Services.expungeData(this.database = Businesses, { id });
 
       return res.status(200).jsend.success(successResponse('Business Deleted Permanently!', 200, 'delete trashed business', {
         error: false, operationStatus: 'Operation Successful!',

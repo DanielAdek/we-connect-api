@@ -16,8 +16,7 @@ const businessModel = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
     trashed: {
-      type: DataTypes.BOOLEAN,
-      default: false
+      type: DataTypes.BOOLEAN
     },
     contactNumber: {
       type: DataTypes.STRING,
