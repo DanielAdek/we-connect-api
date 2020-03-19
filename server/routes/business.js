@@ -23,7 +23,11 @@ export class BusinessRoutes extends BusinessController {
   routes() {
     this.router.post('/register', verifyToken, multerUploads, this.createBusiness);
     this.router.put('/update/:businessId', verifyToken, this.modifyBusiness);
-    this.router.delete('/delete/:businessId', verifyToken, this.deleteBusiness);
-    this.router.get('/search', this.retrieveBusiness);
+    this.router.delete('/delete/:businessId', verifyToken, this.deleteTrashedBusiness);
+    this.router.delete('/trash/:businessId', verifyToken, this.trashBusinessData);
+    this.router.put('/trash/restore/:businessId', verifyToken, this.restoreBusinessFromTrash);
+    this.router.get('/search', this.searchBusiness);
+    this.router.get('/untrashed', this.retreiveUntrashedBusiness);
+    this.router.get('/trashed', this.retreiveTrashedBusiness);
   }
 }

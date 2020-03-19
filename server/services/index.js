@@ -31,9 +31,20 @@ export const retreiveOneData = async (database, data) => {
 /**
  * @method retreiveData
  * @param {object} database database to give
+ * @param {object} data data retreive condition
  * @return {*} object
  */
-export const retreiveData = async (database) => {
+export const retreiveData = async (database, data) => {
+  const result = await database.findAll({ where: data });
+  return result;
+};
+
+/**
+ * @method searchData
+ * @param {object} database database to give
+ * @return {*} object
+ */
+export const searchData = async (database) => {
   const result = await database.findAll();
   return result;
 };

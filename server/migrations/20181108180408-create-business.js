@@ -33,6 +33,9 @@ module.exports = {
     businessImage: {
       type: Sequelize.STRING
     },
+    trashed: {
+      type: Sequelize.BOOLEAN
+    },
     createdAt: {
       allowNull: false,
       type: Sequelize.DATE

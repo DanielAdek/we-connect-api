@@ -104,43 +104,13 @@ export class BusinessController {
   }
 
   /**
-   * delete a business
-   * @param {object} req - The request object
-   * @param {object} res - The response object
-   * @return {object} json
-   * @memberof BusinessController
-   */
-  async deleteBusiness(req, res) {
-    try {
-      const { businessId: id } = req.params;
-
-      const { id: userId } = req.user;
-
-      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId });
-
-      if (!business) {
-        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'delete business', 'business does not exist or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
-      }
-
-      await Services.expungeData(this.database = Businesses, { id });
-
-      return res.status(200).jsend.success(successResponse('Business Deleted!', 200, 'delete business', {
-        error: false, operationStatus: 'Operation Successful!',
-      }));
-    } catch (error) {
-      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'delete business', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
-      return res.status(500).jsend.fail(result);
-    }
-  }
-
-  /**
    * find businesses
    * @param {object} req - The request object
    * @param {object} res - The response object
    * @return {object} json
    * @memberof BusinessController
    */
-  async retrieveBusiness(req, res) {
+  async searchBusiness(req, res) {
     try {
       const { q } = req.query;
 
@@ -153,19 +123,165 @@ export class BusinessController {
         { contactNumber: { $regex: new RegExp(q), $options: 'i' } },
       ];
 
-      const businesses = await Services.retreiveData(this.database = Businesses, { condition });
+      const businesses = await Services.searchData(this.database = Businesses, { condition });
 
       if (!businesses.length) {
-        return res.status(200).jsend.success(successResponse('No Content', 204, 'retieve businesses', {
+        return res.status(200).jsend.success(successResponse('No Content', 204, 'search businesses', {
           error: false, operationStatus: 'Operation Successful!', businesses
         }));
       }
 
-      return res.status(200).jsend.success(successResponse('Businesses Retrieved!', 200, 'retieve businesses', {
+      return res.status(200).jsend.success(successResponse('Businesses Retrieved!', 200, 'search businesses', {
         error: false, operationStatus: 'Operation Successful!', businesses
       }));
     } catch (error) {
-      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'retieve businesses', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'search businesses', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
+  }
+
+  /**
+   * Trash a business
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  async trashBusinessData(req, res) {
+    try {
+      const { businessId: id } = req.params;
+
+      const { id: userId } = req.user;
+
+      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId });
+
+      if (!business) {
+        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'trash business', 'business does not exist or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
+      }
+
+      const data = { trashed: true };
+
+      await Services.modifyData(this.database = Businesses, data, { id });
+
+      return res.status(200).jsend.success(successResponse('Business deleted!', 200, 'trash business', {
+        error: false, operationStatus: 'Operation Successful!',
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'trash business', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
+  }
+
+  /**
+   * Restore from a business Trash
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  async restoreBusinessFromTrash(req, res) {
+    try {
+      const { businessId: id } = req.params;
+
+      const { id: userId } = req.user;
+
+      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId, trashed: true });
+
+      if (!business) {
+        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'restore from trash', 'business does not exist in trash or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
+      }
+
+      const data = { trashed: false };
+
+      await Services.modifyData(this.database = Businesses, data, { id });
+
+      return res.status(200).jsend.success(successResponse('Business Restored!', 200, 'restore business', {
+        error: false, operationStatus: 'Operation Successful!',
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'restore business', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
+  }
+
+  /**
+   * delete a business
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  async deleteTrashedBusiness(req, res) {
+    try {
+      const { businessId: id } = req.params;
+
+      const { id: userId } = req.user;
+
+      const business = await Services.retreiveOneData(this.database = Businesses, { id, userId });
+
+      if (!business) {
+        return res.status(400).jsend.fail(errorResponse('NotFound', 400, '', 'delete trashed business', 'business does not exist or does not belong to you', { error: true, operationStatus: 'Processs Terminated!' }));
+      }
+
+      await Services.expungeData(this.database = Businesses, { id, trashed: true });
+
+      return res.status(200).jsend.success(successResponse('Business Deleted Permanently!', 200, 'delete trashed business', {
+        error: false, operationStatus: 'Operation Successful!',
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'delete trashed business', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
+  }
+
+  /**
+   * find untrashed businesses
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  async retreiveUntrashedBusiness(req, res) {
+    try {
+      const businesses = await Services.retreiveData(this.database = Businesses, { trashed: false });
+
+      if (!businesses.length) {
+        return res.status(200).jsend.success(successResponse('No Content', 204, 'retieve untrashed businesses', {
+          error: false, operationStatus: 'Operation Successful!', businesses
+        }));
+      }
+
+      return res.status(200).jsend.success(successResponse('Businesses Retrieved!', 200, 'retieve untrashed businesses', {
+        error: false, operationStatus: 'Operation Successful!', businesses
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'retieve untrashed businesses', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
+      return res.status(500).jsend.fail(result);
+    }
+  }
+
+  /**
+   * find trashed businesses
+   * @param {object} req - The request object
+   * @param {object} res - The response object
+   * @return {object} json
+   * @memberof BusinessController
+   */
+  async retreiveTrashedBusiness(req, res) {
+    try {
+      const businesses = await Services.retreiveData(this.database = Businesses, { trashed: true });
+
+      if (!businesses.length) {
+        return res.status(200).jsend.success(successResponse('No Content', 204, 'retieve trashed businesses', {
+          error: false, operationStatus: 'Operation Successful!', businesses
+        }));
+      }
+
+      return res.status(200).jsend.success(successResponse('Businesses Retrieved!', 200, 'retieve trashed businesses', {
+        error: false, operationStatus: 'Operation Successful!', businesses
+      }));
+    } catch (error) {
+      const result = errorResponse(`${error.syscall || error.name || 'ServerError'}`, 500, `${error.path || 'No Field'}`, 'retieve trashed businesses', `${error.message || 'Server not responding'}`, { error: true, operationStatus: 'Proccess Terminated!', errorSpec: error });
       return res.status(500).jsend.fail(result);
     }
   }
